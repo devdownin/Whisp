@@ -1,5 +1,6 @@
 package com.example.audiotranscription.ui.screens
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
@@ -15,7 +16,12 @@ fun HistoryScreen(viewModel: HistoryViewModel = viewModel()) {
 
     LazyColumn {
         items(allTranscriptions) { transcription ->
-            Text(text = transcription.text)
+            Column {
+                Text(text = transcription.timestamp.toString()) // Or format it nicely
+                transcription.segments.forEach { segment ->
+                    Text("${segment.startTimestamp} - ${segment.endTimestamp}: ${segment.text}")
+                }
+            }
         }
     }
 }

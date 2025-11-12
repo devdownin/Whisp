@@ -1,8 +1,10 @@
 package com.example.audiotranscription.data.transcription
 
 import android.content.Context
+import android.util.Log
 import com.argmaxinc.whisperkit.WhisperKit
 import com.argmaxinc.whisperkit.ExperimentalWhisperKit
+import com.example.audiotranscription.domain.models.TranscriptionSegment
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -11,8 +13,8 @@ class WhisperEngine(
     private val context: Context
 ) {
     private var whisperKit: WhisperKit? = null
-    private val _transcriptionState = MutableStateFlow("")
-    val transcriptionState: StateFlow<String> = _transcriptionState
+    private val _transcriptionSegments = MutableStateFlow<List<TranscriptionSegment>>(emptyList())
+    val transcriptionSegments: StateFlow<List<TranscriptionSegment>> = _transcriptionSegments
 
     suspend fun initialize() {
         whisperKit = WhisperKit.Builder()
@@ -24,7 +26,14 @@ class WhisperEngine(
     suspend fun startTranscription(audioData: ByteArray) {
         whisperKit?.let {
             val result = it.transcribe(audioData)
-            _transcriptionState.value = result?.text ?: ""
+            val segments = result?.segments?.map { segment ->
+                TranscriptionSegment(
+                    text = segment.text,
+                    startTimestamp = segment.start,
+                    endTimestamp = segment.end
+                )
+            } ?: emptyList()
+            _transcriptionSegments.value = segments
         }
     }
 

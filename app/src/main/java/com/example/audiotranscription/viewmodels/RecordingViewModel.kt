@@ -8,6 +8,7 @@ import com.example.audiotranscription.data.repository.AppDatabase
 import com.example.audiotranscription.data.repository.TranscriptionRepository
 import com.example.audiotranscription.data.transcription.WhisperEngine
 import com.example.audiotranscription.domain.models.Transcription
+import com.example.audiotranscription.domain.models.TranscriptionSegment
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -25,7 +26,7 @@ class RecordingViewModel(
     private val _isRecording = MutableStateFlow(false)
     val isRecording: StateFlow<Boolean> = _isRecording
 
-    val transcription: StateFlow<String> = whisperEngine.transcriptionState
+    val transcriptionSegments: StateFlow<List<TranscriptionSegment>> = whisperEngine.transcriptionSegments
 
     init {
         viewModelScope.launch {
@@ -57,7 +58,11 @@ class RecordingViewModel(
         viewModelScope.launch {
             audioRecorder.stopRecording()
             _isRecording.value = false
-            repository.insert(Transcription(text = transcription.value))
+            val segments = transcriptionSegments.value
+            if (segments.isNotEmpty()) {
+                val fullText = segments.joinToString(separator = "\n") { it.text }
+                repository.insert(Transcription(text = fullText, segments = segments))
+            }
         }
     }
 

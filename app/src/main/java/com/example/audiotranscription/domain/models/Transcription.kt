@@ -8,5 +8,6 @@ data class Transcription(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val text: String,
+    val segments: List<TranscriptionSegment>,
     val timestamp: Long = System.currentTimeMillis()
 )
