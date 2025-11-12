@@ -10,13 +10,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.audiotranscription.viewmodels.HistoryViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
-fun HistoryScreen(viewModel: HistoryViewModel = viewModel()) {
+fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel()) {
     val transcriptions by viewModel.transcriptions.collectAsState(initial = emptyList())
     val searchQuery by viewModel.searchQuery.collectAsState()
     var showDialog by remember { mutableStateOf<Int?>(null) }

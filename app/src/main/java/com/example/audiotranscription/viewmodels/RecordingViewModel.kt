@@ -1,28 +1,23 @@
 package com.example.audiotranscription.viewmodels
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.audiotranscription.data.audio.AudioRecorder
-import com.example.audiotranscription.data.repository.AppDatabase
 import com.example.audiotranscription.data.repository.TranscriptionRepository
 import com.example.audiotranscription.data.transcription.WhisperEngine
 import com.example.audiotranscription.domain.models.Transcription
 import com.example.audiotranscription.domain.models.TranscriptionSegment
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class RecordingViewModel(
-    application: Application,
+@HiltViewModel
+class RecordingViewModel @Inject constructor(
     private val audioRecorder: AudioRecorder,
-    private val whisperEngine: WhisperEngine
-) : AndroidViewModel(application) {
+    private val whisperEngine: WhisperEngine,
     private val repository: TranscriptionRepository
-
-    init {
-        val transcriptionDao = AppDatabase.getDatabase(application).transcriptionDao()
-        repository = TranscriptionRepository(transcriptionDao)
-    }
+) : ViewModel() {
     private val _isRecording = MutableStateFlow(false)
     val isRecording: StateFlow<Boolean> = _isRecording
 
