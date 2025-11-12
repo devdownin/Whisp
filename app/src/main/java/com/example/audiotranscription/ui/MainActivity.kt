@@ -12,27 +12,32 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.animation.core.*
 import androidx.compose.runtime.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.audiotranscription.R
 import com.example.audiotranscription.ui.components.WaveformVisualizer
 import com.example.audiotranscription.data.transcription.WhisperEngine
 import java.io.File
 import java.io.FileOutputStream
 import com.example.audiotranscription.ui.theme.AudioTranscriptionTheme
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.composable
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.example.audiotranscription.ui.screens.HistoryScreen
 import com.example.audiotranscription.ui.screens.SettingsScreen
 import com.example.audiotranscription.viewmodels.RecordingViewModel
@@ -88,8 +93,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val navController = rememberNavController()
-                    NavHost(navController = navController, startDestination = "recording") {
+                    val navController = rememberAnimatedNavController()
+                    AnimatedNavHost(navController = navController, startDestination = "recording") {
                         composable("recording") { RecordingScreen(navController) }
                         composable("settings") { SettingsScreen() }
                         composable("history") { HistoryScreen() }
@@ -137,23 +142,40 @@ fun RecordingScreen(
         Spacer(modifier = Modifier.height(16.dp))
         WaveformVisualizer(audioData = audioData)
         Spacer(modifier = Modifier.height(16.dp))
+        val haptic = LocalHapticFeedback.current
+        val haptic = LocalHapticFeedback.current
+        val infiniteTransition = rememberInfiniteTransition()
+        val scale by infiniteTransition.animateFloat(
+            initialValue = 1f,
+            targetValue = if (isRecording) 1.1f else 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(1000),
+                repeatMode = RepeatMode.Reverse
+            )
+        )
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            FilledTonalButton(onClick = {
-                if (isRecording) {
-                    viewModel.stopRecording()
-                } else {
-                    viewModel.startRecording()
-                }
-            }) {
+            FilledTonalButton(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    if (isRecording) {
+                        viewModel.stopRecording()
+                    } else {
+                        viewModel.startRecording()
+                    }
+                },
+                modifier = Modifier.scale(scale)
+            ) {
                 Icon(if (isRecording) Icons.Default.Stop else Icons.Default.PlayArrow, contentDescription = null)
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                 Text(if (isRecording) stringResource(R.string.stop_recording) else stringResource(R.string.start_recording))
             }
             val context = LocalContext.current
             FilledTonalButton(onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 copyToClipboard(context, transcription)
             }) {
                 Icon(Icons.Default.ContentCopy, contentDescription = null)
@@ -161,6 +183,7 @@ fun RecordingScreen(
                 Text(stringResource(R.string.copy))
             }
             FilledTonalButton(onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 shareText(context, transcription)
             }) {
                 Icon(Icons.Default.Share, contentDescription = null)
@@ -168,6 +191,7 @@ fun RecordingScreen(
                 Text(stringResource(R.string.share))
             }
             FilledTonalButton(onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 saveTranscriptionToFile(context, transcription)
             }) {
                 Icon(Icons.Default.Save, contentDescription = null)
@@ -175,6 +199,7 @@ fun RecordingScreen(
                 Text(stringResource(R.string.save))
             }
             FilledTonalButton(onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 navController.navigate("settings")
             }) {
                 Icon(Icons.Default.Settings, contentDescription = null)
@@ -182,6 +207,7 @@ fun RecordingScreen(
                 Text(stringResource(R.string.settings))
             }
             FilledTonalButton(onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 navController.navigate("history")
             }) {
                 Icon(Icons.Default.History, contentDescription = null)
