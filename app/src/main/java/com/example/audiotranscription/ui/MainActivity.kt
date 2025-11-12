@@ -31,23 +31,23 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.audiotranscription.R
 import com.example.audiotranscription.domain.models.TranscriptionSegment
 import com.example.audiotranscription.ui.components.WaveformVisualizer
-import com.example.audiotranscription.data.transcription.WhisperEngine
-import java.io.File
-import java.io.FileOutputStream
-import java.util.concurrent.TimeUnit
+import com.example.audiotranscription.ui.screens.HistoryScreen
+import com.example.audiotranscription.ui.screens.SettingsScreen
 import com.example.audiotranscription.ui.theme.AudioTranscriptionTheme
+import com.example.audiotranscription.viewmodels.RecordingViewModel
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-import com.example.audiotranscription.ui.screens.HistoryScreen
-import com.example.audiotranscription.ui.screens.SettingsScreen
-import com.example.audiotranscription.viewmodels.RecordingViewModel
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.audiotranscription.data.audio.AudioRecorder
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.File
+import java.io.FileOutputStream
+import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -113,12 +113,49 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun RecordingScreen(
-    navController: androidx.navigation.NavController,
+    navController: NavController,
     viewModel: RecordingViewModel = hiltViewModel()
 ) {
     val isRecording by viewModel.isRecording.collectAsState()
     val audioData by viewModel.audioData.collectAsState()
     val transcriptionSegments by viewModel.transcriptionSegments.collectAsState()
+
+    RecordingScreenContent(
+        navController = navController,
+        isRecording = isRecording,
+        audioData = audioData,
+        transcriptionSegments = transcriptionSegments,
+        onStartRecording = viewModel::startRecording,
+        onStopRecording = viewModel::stopRecording
+    )
+}
+
+@Composable
+fun RecordingScreenContent(
+    navController: NavController,
+    isRecording: Boolean,
+    audioData: ByteArray?,
+    transcriptionSegments: List<TranscriptionSegment>,
+    onStartRecording: () -> Unit,
+    onStopRecording: () -> Unit
+) {
+    val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
+    val transcriptionText = remember(transcriptionSegments) {
+        transcriptionSegments.joinToString(separator = "\n") { it.text }.trim()
+    }
+    val copyShareEnabled = transcriptionText.isNotEmpty()
+    val srtEnabled = transcriptionSegments.isNotEmpty()
+    val infiniteTransition = rememberInfiniteTransition(label = "recording_scale")
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = if (isRecording) 1.1f else 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "recording_scale_anim"
+    )
 
     Column(
         modifier = Modifier
@@ -139,17 +176,6 @@ fun RecordingScreen(
         Spacer(modifier = Modifier.height(16.dp))
         WaveformVisualizer(audioData = audioData)
         Spacer(modifier = Modifier.height(16.dp))
-        val haptic = LocalHapticFeedback.current
-        val haptic = LocalHapticFeedback.current
-        val infiniteTransition = rememberInfiniteTransition()
-        val scale by infiniteTransition.animateFloat(
-            initialValue = 1f,
-            targetValue = if (isRecording) 1.1f else 1f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(1000),
-                repeatMode = RepeatMode.Reverse
-            )
-        )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -159,38 +185,55 @@ fun RecordingScreen(
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     if (isRecording) {
-                        viewModel.stopRecording()
+                        onStopRecording()
                     } else {
-                        viewModel.startRecording()
+                        onStartRecording()
                     }
                 },
                 modifier = Modifier.scale(scale)
             ) {
-                Icon(if (isRecording) Icons.Default.Stop else Icons.Default.PlayArrow, contentDescription = null)
+                Icon(
+                    if (isRecording) Icons.Default.Stop else Icons.Default.PlayArrow,
+                    contentDescription = null
+                )
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                Text(if (isRecording) stringResource(R.string.stop_recording) else stringResource(R.string.start_recording))
+                Text(
+                    if (isRecording) {
+                        stringResource(R.string.stop_recording)
+                    } else {
+                        stringResource(R.string.start_recording)
+                    }
+                )
             }
-            val context = LocalContext.current
-            FilledTonalButton(onClick = {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                copyToClipboard(context, transcription)
-            }) {
+            FilledTonalButton(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    copyToClipboard(context, transcriptionText)
+                },
+                enabled = copyShareEnabled
+            ) {
                 Icon(Icons.Default.ContentCopy, contentDescription = null)
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                 Text(stringResource(R.string.copy))
             }
-            FilledTonalButton(onClick = {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                shareText(context, transcription)
-            }) {
+            FilledTonalButton(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    shareText(context, transcriptionText)
+                },
+                enabled = copyShareEnabled
+            ) {
                 Icon(Icons.Default.Share, contentDescription = null)
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                 Text(stringResource(R.string.share))
             }
-            FilledTonalButton(onClick = {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                saveTranscriptionToFile(context, transcription)
-            }) {
+            FilledTonalButton(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    saveTranscriptionToFile(context, transcriptionText)
+                },
+                enabled = copyShareEnabled
+            ) {
                 Icon(Icons.Default.Save, contentDescription = null)
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                 Text(stringResource(R.string.save))
@@ -211,11 +254,14 @@ fun RecordingScreen(
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                 Text(stringResource(R.string.history))
             }
-            FilledTonalButton(onClick = {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                val srtText = toSrt(transcriptionSegments)
-                saveTranscriptionToFile(context, srtText, "transcription.srt")
-            }) {
+            FilledTonalButton(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    val srtText = toSrt(transcriptionSegments)
+                    saveTranscriptionToFile(context, srtText, "transcription.srt")
+                },
+                enabled = srtEnabled
+            ) {
                 Icon(Icons.Default.Save, contentDescription = null)
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                 Text("Export SRT")
@@ -274,7 +320,16 @@ fun formatSrtTimestamp(timestamp: Long): String {
 @Composable
 fun RecordingScreenPreview() {
     AudioTranscriptionTheme {
-        // Dummy NavController for preview
-        RecordingScreen(navController = rememberNavController())
+        RecordingScreenContent(
+            navController = rememberNavController(),
+            isRecording = false,
+            audioData = ByteArray(128) { ((it % 32) * 4).toByte() },
+            transcriptionSegments = listOf(
+                TranscriptionSegment("Hello world", 0, 2_000),
+                TranscriptionSegment("This is a preview", 2_000, 5_000)
+            ),
+            onStartRecording = {},
+            onStopRecording = {}
+        )
     }
 }
