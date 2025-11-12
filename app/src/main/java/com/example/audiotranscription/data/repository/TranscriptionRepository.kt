@@ -9,4 +9,12 @@ class TranscriptionRepository(private val transcriptionDao: TranscriptionDao) {
     suspend fun insert(transcription: Transcription) {
         transcriptionDao.insert(transcription)
     }
+
+    suspend fun delete(transcription: Transcription) {
+        transcriptionDao.delete(transcription)
+    }
+
+    fun searchTranscriptions(searchQuery: String): Flow<List<Transcription>> {
+        return transcriptionDao.searchTranscriptions(searchQuery)
+    }
 }

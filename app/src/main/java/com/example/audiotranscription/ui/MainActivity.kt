@@ -45,9 +45,11 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.example.audiotranscription.ui.screens.HistoryScreen
 import com.example.audiotranscription.ui.screens.SettingsScreen
 import com.example.audiotranscription.viewmodels.RecordingViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.audiotranscription.data.audio.AudioRecorder
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val requestPermissionLauncher =
@@ -112,19 +114,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun RecordingScreen(
     navController: androidx.navigation.NavController,
-    // TODO: Replace with a real ViewModel instance
-    viewModel: RecordingViewModel = viewModel(
-        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
-            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                val context = androidx.compose.ui.platform.LocalContext.current
-                return RecordingViewModel(
-                    context.applicationContext as android.app.Application,
-                    AudioRecorder(context),
-                    WhisperEngine(context)
-                ) as T
-            }
-        }
-    )
+    viewModel: RecordingViewModel = hiltViewModel()
 ) {
     val isRecording by viewModel.isRecording.collectAsState()
     val audioData by viewModel.audioData.collectAsState()
