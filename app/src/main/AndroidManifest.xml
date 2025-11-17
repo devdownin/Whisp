@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
-        android:name=".AudioTranscriptionApp"
+        android:name="AudioTranscriptionApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -16,13 +16,12 @@
         android:theme="@style/Theme.AudioTranscription"
         tools:targetApi="31">
         <activity
-            android:name=".ui.MainActivity"
+            android:name="com.example.audiotranscription.ui.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.AudioTranscription">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

@@ -54,7 +54,38 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
 
         // Language selection
         Text(stringResource(R.string.language))
-        // TODO: Add language selection dropdown
+        var languageMenuExpanded by remember { mutableStateOf(false) }
+        Box {
+            Button(onClick = { languageMenuExpanded = true }) {
+                Text(selectedLanguage)
+            }
+            DropdownMenu(
+                expanded = languageMenuExpanded,
+                onDismissRequest = { languageMenuExpanded = false }
+            ) {
+                // Example set of common Whisper languages; use ISO codes
+                DropdownMenuItem(text = { Text("English") }, onClick = {
+                    viewModel.setLanguage("en")
+                    languageMenuExpanded = false
+                })
+                DropdownMenuItem(text = { Text("Français") }, onClick = {
+                    viewModel.setLanguage("fr")
+                    languageMenuExpanded = false
+                })
+                DropdownMenuItem(text = { Text("Español") }, onClick = {
+                    viewModel.setLanguage("es")
+                    languageMenuExpanded = false
+                })
+                DropdownMenuItem(text = { Text("French") }, onClick = {
+                    viewModel.setLanguage("fr")
+                    languageMenuExpanded = false
+                })
+                DropdownMenuItem(text = { Text("Auto") }, onClick = {
+                    viewModel.setLanguage("auto")
+                    languageMenuExpanded = false
+                })
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 

@@ -59,29 +59,34 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel()) {
                 Card(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(
-                        modifier = Modifier.weight(1f)
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(transcription.timestamp)),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = transcription.text,
-                            style = MaterialTheme.typography.bodyMedium,
-                            maxLines = 3
-                        )
-                    }
-                    IconButton(onClick = { showDialog = transcription.id }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete")
+                        Column(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                text = SimpleDateFormat(
+                                    "yyyy-MM-dd HH:mm:ss",
+                                    Locale.getDefault()
+                                ).format(Date(transcription.timestamp)),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = transcription.text,
+                                style = MaterialTheme.typography.bodyMedium,
+                                maxLines = 3
+                            )
+                        }
+                        IconButton(onClick = { showDialog = transcription.id }) {
+                            Icon(Icons.Default.Delete, contentDescription = "Delete")
+                        }
                     }
                 }
             }
         }
     }
+
 }
