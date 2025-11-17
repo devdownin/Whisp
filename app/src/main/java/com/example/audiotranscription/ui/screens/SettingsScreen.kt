@@ -76,10 +76,6 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
                     viewModel.setLanguage("es")
                     languageMenuExpanded = false
                 })
-                DropdownMenuItem(text = { Text("French") }, onClick = {
-                    viewModel.setLanguage("fr")
-                    languageMenuExpanded = false
-                })
                 DropdownMenuItem(text = { Text("Auto") }, onClick = {
                     viewModel.setLanguage("auto")
                     languageMenuExpanded = false

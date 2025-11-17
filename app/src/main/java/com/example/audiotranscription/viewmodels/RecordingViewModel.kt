@@ -66,5 +66,9 @@ class RecordingViewModel @Inject constructor(
         whisperEngine.release()
     }
 
+    fun clearTranscription() {
+        whisperEngine.clearTranscription()
+    }
+
     val audioData: StateFlow<ByteArray?> = audioRecorder.audioData
 }

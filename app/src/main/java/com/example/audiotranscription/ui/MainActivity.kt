@@ -127,7 +127,8 @@ fun RecordingScreen(
         audioData = audioData,
         transcriptionSegments = transcriptionSegments,
         onStartRecording = viewModel::startRecording,
-        onStopRecording = viewModel::stopRecording
+        onStopRecording = viewModel::stopRecording,
+        onClearTranscription = viewModel::clearTranscription
     )
 }
 
@@ -138,7 +139,8 @@ fun RecordingScreenContent(
     audioData: ByteArray?,
     transcriptionSegments: List<TranscriptionSegment>,
     onStartRecording: () -> Unit,
-    onStopRecording: () -> Unit
+    onStopRecording: () -> Unit,
+    onClearTranscription: () -> Unit
 ) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
@@ -195,7 +197,7 @@ fun RecordingScreenContent(
             ) {
                 Icon(
                     if (isRecording) Icons.Default.Stop else Icons.Default.PlayArrow,
-                    contentDescription = null
+                    contentDescription = if (isRecording) stringResource(R.string.stop_recording) else stringResource(R.string.start_recording)
                 )
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                 Text(
@@ -209,11 +211,22 @@ fun RecordingScreenContent(
             FilledTonalButton(
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onClearTranscription()
+                },
+                enabled = copyShareEnabled
+            ) {
+                Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.clear))
+                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                Text(stringResource(R.string.clear))
+            }
+            FilledTonalButton(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     copyToClipboard(context, transcriptionText)
                 },
                 enabled = copyShareEnabled
             ) {
-                Icon(Icons.Default.ContentCopy, contentDescription = null)
+                Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.copy))
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                 Text(stringResource(R.string.copy))
             }
@@ -224,7 +237,7 @@ fun RecordingScreenContent(
                 },
                 enabled = copyShareEnabled
             ) {
-                Icon(Icons.Default.Share, contentDescription = null)
+                Icon(Icons.Default.Share, contentDescription = stringResource(R.string.share))
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                 Text(stringResource(R.string.share))
             }
@@ -235,7 +248,7 @@ fun RecordingScreenContent(
                 },
                 enabled = copyShareEnabled
             ) {
-                Icon(Icons.Default.Save, contentDescription = null)
+                Icon(Icons.Default.Save, contentDescription = stringResource(R.string.save))
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                 Text(stringResource(R.string.save))
             }
@@ -243,7 +256,7 @@ fun RecordingScreenContent(
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 navController.navigate("settings")
             }) {
-                Icon(Icons.Default.Settings, contentDescription = null)
+                Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                 Text(stringResource(R.string.settings))
             }
@@ -251,7 +264,7 @@ fun RecordingScreenContent(
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 navController.navigate("history")
             }) {
-                Icon(Icons.Default.History, contentDescription = null)
+                Icon(Icons.Default.History, contentDescription = stringResource(R.string.history))
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                 Text(stringResource(R.string.history))
             }
@@ -263,7 +276,7 @@ fun RecordingScreenContent(
                 },
                 enabled = srtEnabled
             ) {
-                Icon(Icons.Default.Save, contentDescription = null)
+                Icon(Icons.Default.Save, contentDescription = "Export SRT")
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                 Text("Export SRT")
             }

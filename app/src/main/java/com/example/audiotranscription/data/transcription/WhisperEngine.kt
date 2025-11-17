@@ -49,6 +49,10 @@ class WhisperEngine(
         // This method is kept for future streaming/cancellation support.
     }
 
+    fun clearTranscription() {
+        _transcriptionSegments.value = emptyList()
+    }
+
     fun release() {
         whisperKit = null
     }
