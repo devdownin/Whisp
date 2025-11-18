@@ -21,10 +21,13 @@ class WhisperEngine(
         whisperKit = WhisperKit.Builder()
             .setModel("whisperkit-litert/openai_whisper-base")
             .setApplicationContext(context.applicationContext)
-            // WhisperKit 0.3.x expects a (progress, result) callback.
-            // Incremental updates are not used here because
-            // transcription is handled synchronously in startTranscription.
-            .setCallback { _, _ -> }
+            .setCallback { _, result ->
+                val text = result?.toString().orEmpty()
+                if (text.isNotBlank()) {
+                    // Update transcription segments with the latest result
+                    _transcriptionSegments.value = listOf(TranscriptionSegment(text, 0L, 0L))
+                }
+            }
             .build()
     }
 
@@ -34,12 +37,8 @@ class WhisperEngine(
 
         whisperKit?.let { kit ->
             isTranscribing = true
-            val transcriptionResult = kit.transcribe(audioData)
-            val text = transcriptionResult?.toString().orEmpty()
-            val segments =
-                if (text.isNotBlank()) listOf(TranscriptionSegment(text, 0L, 0L)) else emptyList()
-
-            _transcriptionSegments.value = segments
+            // Transcription results are now handled by the callback
+            kit.transcribe(audioData)
             isTranscribing = false
         }
     }
