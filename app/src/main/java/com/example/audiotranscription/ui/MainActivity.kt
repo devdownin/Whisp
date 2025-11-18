@@ -343,7 +343,8 @@ fun RecordingScreenPreview() {
                 TranscriptionSegment("This is a preview", 2_000, 5_000)
             ),
             onStartRecording = {},
-            onStopRecording = {}
+            onStopRecording = {},
+            onClearTranscription = {}
         )
     }
 }
