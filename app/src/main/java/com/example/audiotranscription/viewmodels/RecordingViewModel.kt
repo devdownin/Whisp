@@ -8,8 +8,10 @@ import com.example.audiotranscription.data.transcription.WhisperEngine
 import com.example.audiotranscription.domain.models.Transcription
 import com.example.audiotranscription.domain.models.TranscriptionSegment
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,7 +28,9 @@ class RecordingViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            whisperEngine.initialize()
+            withContext(Dispatchers.IO) {
+                whisperEngine.initialize()
+            }
             whisperEngine.transcriptionFlow.collect { text ->
                 val currentSegments = _transcriptionSegments.value.toMutableList()
                 if (currentSegments.isNotEmpty()) {
