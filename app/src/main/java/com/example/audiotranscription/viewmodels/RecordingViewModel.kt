@@ -21,11 +21,21 @@ class RecordingViewModel @Inject constructor(
     private val _isRecording = MutableStateFlow(false)
     val isRecording: StateFlow<Boolean> = _isRecording
 
-    val transcriptionSegments: StateFlow<List<TranscriptionSegment>> = whisperEngine.transcriptionSegments
+    private val _transcriptionSegments = MutableStateFlow<List<TranscriptionSegment>>(emptyList())
+    val transcriptionSegments: StateFlow<List<TranscriptionSegment>> = _transcriptionSegments
 
     init {
         viewModelScope.launch {
             whisperEngine.initialize()
+            whisperEngine.transcriptionFlow.collect { text ->
+                val currentSegments = _transcriptionSegments.value.toMutableList()
+                if (currentSegments.isNotEmpty()) {
+                    currentSegments[currentSegments.lastIndex] = TranscriptionSegment(text, 0L, 0L)
+                } else {
+                    currentSegments.add(TranscriptionSegment(text, 0L, 0L))
+                }
+                _transcriptionSegments.value = currentSegments
+            }
         }
         observeAudioData()
     }
@@ -67,7 +77,7 @@ class RecordingViewModel @Inject constructor(
     }
 
     fun clearTranscription() {
-        whisperEngine.clearTranscription()
+        _transcriptionSegments.value = emptyList()
     }
 
     val audioData: StateFlow<ByteArray?> = audioRecorder.audioData

@@ -4,16 +4,16 @@ import android.content.Context
 import com.argmaxinc.whisperkit.ExperimentalWhisperKit
 import com.argmaxinc.whisperkit.WhisperKit
 import com.example.audiotranscription.domain.models.TranscriptionSegment
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 
 @OptIn(ExperimentalWhisperKit::class)
 class WhisperEngine(
     private val context: Context
 ) {
     private var whisperKit: WhisperKit? = null
-    private val _transcriptionSegments = MutableStateFlow<List<TranscriptionSegment>>(emptyList())
-    val transcriptionSegments: StateFlow<List<TranscriptionSegment>> = _transcriptionSegments
+    private val _transcriptionFlow = MutableSharedFlow<String>()
+    val transcriptionFlow: SharedFlow<String> = _transcriptionFlow
 
     private var isTranscribing: Boolean = false
 
@@ -24,8 +24,7 @@ class WhisperEngine(
             .setCallback { _, result ->
                 val text = result?.toString().orEmpty()
                 if (text.isNotBlank()) {
-                    // Update transcription segments with the latest result
-                    _transcriptionSegments.value = listOf(TranscriptionSegment(text, 0L, 0L))
+                    _transcriptionFlow.tryEmit(text)
                 }
             }
             .build()
@@ -46,10 +45,6 @@ class WhisperEngine(
     fun stopTranscription() {
         // Currently, transcription is done on-demand from the latest audio buffer.
         // This method is kept for future streaming/cancellation support.
-    }
-
-    fun clearTranscription() {
-        _transcriptionSegments.value = emptyList()
     }
 
     fun release() {
