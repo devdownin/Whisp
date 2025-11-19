@@ -12,8 +12,8 @@ class WhisperEngine(
     private val context: Context
 ) {
     private var whisperKit: WhisperKit? = null
-    private val _transcriptionFlow = MutableSharedFlow<String>()
-    val transcriptionFlow: SharedFlow<String> = _transcriptionFlow
+    private val _transcriptionFlow = MutableSharedFlow<TranscriptionSegment>()
+    val transcriptionFlow: SharedFlow<TranscriptionSegment> = _transcriptionFlow
 
     private var isTranscribing: Boolean = false
 
@@ -22,9 +22,18 @@ class WhisperEngine(
             .setModel("whisperkit-litert/openai_whisper-base")
             .setApplicationContext(context.applicationContext)
             .setCallback { _, result ->
-                val text = result?.toString().orEmpty()
-                if (text.isNotBlank()) {
-                    _transcriptionFlow.tryEmit(text)
+                result?.segments?.forEach { segment ->
+                    val text = segment.text
+                    if (text.isNotBlank()) {
+                        _transcriptionFlow.tryEmit(
+                            TranscriptionSegment(
+                                text = text,
+                                startTimestamp = segment.start.toLong(),
+                                endTimestamp = segment.end.toLong(),
+                                isFinal = false // Assuming all segments from callback are not final
+                            )
+                        )
+                    }
                 }
             }
             .build()
@@ -36,15 +45,27 @@ class WhisperEngine(
 
         whisperKit?.let { kit ->
             isTranscribing = true
-            // Transcription results are now handled by the callback
-            kit.transcribe(audioData)
+            val result = kit.transcribe(audioData)
+            result?.segments?.forEach { segment ->
+                val text = segment.text
+                if (text.isNotBlank()) {
+                    _transcriptionFlow.tryEmit(
+                        TranscriptionSegment(
+                            text = text,
+                            startTimestamp = segment.start.toLong(),
+                            endTimestamp = segment.end.toLong(),
+                            isFinal = true // Mark the final segment
+                        )
+                    )
+                }
+            }
             isTranscribing = false
         }
     }
 
     fun stopTranscription() {
-        // Currently, transcription is done on-demand from the latest audio buffer.
-        // This method is kept for future streaming/cancellation support.
+        // Since we are now handling the final transcription in startTranscription,
+        // this method can be simplified.
     }
 
     fun release() {

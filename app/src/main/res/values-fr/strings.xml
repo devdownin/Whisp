@@ -69,5 +69,24 @@
     <string name="base">Base</string>
     <string name="small">Petit</string>
     <string name="medium">Moyen</string>
-    <string name="clear">Effacer</string>
+
+    <!-- Settings Screen -->
+    <string name="language_and_voice">Langue et Voix</string>
+    <string name="transcription_language">Langue de Transcription</string>
+    <string name="voice_recognition_model">Modèle de Reconnaissance Vocale</string>
+    <string name="transcription_preferences">Préférences de Transcription</string>
+    <string name="auto_save_transcriptions">Sauvegarde Automatique</string>
+    <string name="profanity_filter">Filtre à Injures</string>
+    <string name="profanity_filter_description">Remplace les mots grossiers par des astérisques</string>
+    <string name="punctuation_and_formatting">Ponctuation et Formatage</string>
+    <string name="data_management">Gestion des Données</string>
+    <string name="export_all_transcriptions">Exporter Toutes les Transcriptions</string>
+    <string name="clear_transcription_history">Effacer l\'Historique des Transcriptions</string>
+    <string name="about_and_support">À Propos et Support</string>
+    <string name="help_and_faq">Aide &amp; FAQ</string>
+    <string name="app_version">Version de l\'App</string>
+
+    <!-- Models -->
+    <string name="model_enhanced">Amélioré</string>
+    <string name="model_standard">Standard</string>
 </resources>

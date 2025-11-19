@@ -69,5 +69,25 @@
     <string name="base">Base</string>
     <string name="small">Small</string>
     <string name="medium">Medium</string>
-    <string name="clear">Clear</string>
+
+    <!-- Settings Screen -->
+    <string name="language_and_voice">Language &amp; Voice</string>
+    <string name="transcription_language">Transcription Language</string>
+    <string name="voice_recognition_model">Voice Recognition Model</string>
+    <string name="transcription_preferences">Transcription Preferences</string>
+    <string name="auto_save_transcriptions">Auto-save Transcriptions</string>
+    <string name="profanity_filter">Profanity Filter</string>
+    <string name="profanity_filter_description">Replaces profane words with asterisks</string>
+    <string name="punctuation_and_formatting">Punctuation &amp; Formatting</string>
+    <string name="data_management">Data Management</string>
+    <string name="export_all_transcriptions">Export All Transcriptions</string>
+    <string name="clear_transcription_history">Clear Transcription History</string>
+    <string name="about_and_support">About &amp; Support</string>
+    <string name="help_and_faq">Help &amp; FAQ</string>
+    <string name="app_version">App Version</string>
+
+    <!-- Models -->
+    <string name="model_enhanced">Enhanced</string>
+    <string name="model_standard">Standard</string>
+    <string name="coming_soon">Coming Soon!</string>
 </resources>

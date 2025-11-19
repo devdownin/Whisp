@@ -14,6 +14,10 @@ class TranscriptionRepository(private val transcriptionDao: TranscriptionDao) {
         transcriptionDao.delete(transcription)
     }
 
+    suspend fun deleteAll() {
+        transcriptionDao.deleteAll()
+    }
+
     fun searchTranscriptions(searchQuery: String): Flow<List<Transcription>> {
         return transcriptionDao.searchTranscriptions(searchQuery)
     }

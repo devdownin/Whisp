@@ -1,28 +1,53 @@
 package com.example.audiotranscription.viewmodels
 
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.lifecycle.viewModelScope
+import com.example.audiotranscription.data.repository.SettingsRepository
+import com.example.audiotranscription.data.repository.TranscriptionRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SettingsViewModel : ViewModel() {
-    private val _selectedModel = MutableStateFlow("tiny")
-    val selectedModel: StateFlow<String> = _selectedModel
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
+    private val settingsRepository: SettingsRepository,
+    private val transcriptionRepository: TranscriptionRepository
+) : ViewModel() {
 
-    private val _selectedLanguage = MutableStateFlow("en")
-    val selectedLanguage: StateFlow<String> = _selectedLanguage
+    val selectedModel: StateFlow<String> = settingsRepository.selectedModel
+    val selectedLanguage: StateFlow<String> = settingsRepository.selectedLanguage
+    val autoSaveTranscriptions: StateFlow<Boolean> = settingsRepository.autoSave
+    val profanityFilter: StateFlow<Boolean> = settingsRepository.profanityFilter
+    val punctuationAndFormatting: StateFlow<Boolean> = settingsRepository.punctuation
 
-    private val _selectedProcessingMode = MutableStateFlow("streaming")
-    val selectedProcessingMode: StateFlow<String> = _selectedProcessingMode
-
-    fun setModel(model: String) {
-        _selectedModel.value = model
+    fun setSelectedModel(model: String) {
+        settingsRepository.setModel(model)
     }
 
-    fun setLanguage(language: String) {
-        _selectedLanguage.value = language
+    fun setSelectedLanguage(language: String) {
+        settingsRepository.setLanguage(language)
     }
 
-    fun setProcessingMode(mode: String) {
-        _selectedProcessingMode.value = mode
+    fun setAutoSave(enabled: Boolean) {
+        settingsRepository.setAutoSave(enabled)
+    }
+
+    fun setProfanityFilter(enabled: Boolean) {
+        settingsRepository.setProfanityFilter(enabled)
+    }
+
+    fun setPunctuation(enabled: Boolean) {
+        settingsRepository.setPunctuation(enabled)
+    }
+
+    fun exportAllTranscriptions() {
+        // Placeholder for export logic
+    }
+
+    fun clearTranscriptionHistory() {
+        viewModelScope.launch {
+            transcriptionRepository.deleteAll()
+        }
     }
 }

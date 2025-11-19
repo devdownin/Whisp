@@ -20,4 +20,7 @@ interface TranscriptionDao {
 
     @Query("SELECT * FROM transcriptions WHERE text LIKE :searchQuery ORDER BY timestamp DESC")
     fun searchTranscriptions(searchQuery: String): Flow<List<Transcription>>
+
+    @Query("DELETE FROM transcriptions")
+    suspend fun deleteAll()
 }
